@@ -3,7 +3,7 @@ import logging
 from typing import assert_never, cast, override
 
 import flask_login
-from flask import Request, Response, request
+from flask import Request, Response, g, request
 from flask_login import user_loaded_from_request, user_logged_in
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -21,7 +21,7 @@ from libs.token import (
     extract_webapp_passport,
     is_admin_api_key_request,
 )
-from models import Account, Tenant, TenantAccountJoin
+from models import Account, AccountStatus, Tenant, TenantAccountJoin, TenantAccountRole, TenantStatus
 from models.enums import EndUserType
 from models.model import AppMCPServer, EndUser
 from services.account_service import AccountService
@@ -60,6 +60,37 @@ def load_user_from_request(request_from_flask_login: Request) -> LoginUser | Non
         return _load_user_from_request(request_from_flask_login, session)
 
 
+def _load_default_console_account(session: Session) -> Account | None:
+    """Return the account used when console authentication is bypassed.
+
+    Console sign-in is removed in this deployment: any console request without a
+    session token is served as the first active workspace owner so the UI is
+    reachable without logging in. Returns ``None`` when no usable account exists
+    yet (for example a fresh instance that has not finished setup), so callers
+    can fall back to the normal unauthorized response.
+    """
+    account_id = session.scalar(
+        select(Account.id)
+        .join(TenantAccountJoin, TenantAccountJoin.account_id == Account.id)
+        .join(Tenant, Tenant.id == TenantAccountJoin.tenant_id)
+        .where(
+            Account.status == AccountStatus.ACTIVE,
+            TenantAccountJoin.role == TenantAccountRole.OWNER,
+            Tenant.status == TenantStatus.NORMAL,
+        )
+        .order_by(Account.created_at.asc())
+        .limit(1)
+    )
+    if account_id is None:
+        account_id = session.scalar(
+            select(Account.id).where(Account.status == AccountStatus.ACTIVE).order_by(Account.created_at.asc()).limit(1)
+        )
+    if account_id is None:
+        return None
+
+    return AccountService.load_logged_in_account(account_id=account_id, session=session)
+
+
 def _load_user_from_request(request_from_flask_login: Request, session: Session) -> LoginUser | None:
     """Load user based on the request using an explicit database session."""
     del request_from_flask_login
@@ -90,7 +121,13 @@ def _load_user_from_request(request_from_flask_login: Request, session: Session)
 
     if request.blueprint in {"console", "inner_api"}:
         if not auth_token:
-            raise Unauthorized("Invalid Authorization token.")
+            # Console sign-in is removed: fall back to the default account instead
+            # of challenging the caller. Marked so CSRF validation can be skipped too.
+            default_account = _load_default_console_account(session)
+            if default_account is None:
+                raise Unauthorized("Invalid Authorization token.")
+            g._login_bypassed = True
+            return default_account
         decoded = PassportService().verify(auth_token)
         user_id = decoded.get("user_id")
         source = decoded.get("token_source")

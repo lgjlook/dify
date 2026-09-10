@@ -82,17 +82,15 @@ const createRedirectResponse = (pathname: string, setCookies: string[] = []) => 
   })
 }
 
-const createSigninRedirectResponse = (redirectTarget: LoginRedirectTarget) =>
-  createRedirectResponse(
-    `${basePath}/signin?redirect_url=${encodeURIComponent(redirectTarget.href)}`,
-  )
+// Console sign-in has been removed, so a failed refresh goes straight home.
+const createHomeRedirectResponse = () => createRedirectResponse(`${basePath}/`)
 
 export async function GET(request: Request) {
   const redirectTarget = resolveSafeRedirectTarget(request)
   const refreshUrl = resolveServerConsoleApiUrl(REFRESH_TOKEN_PATH)
   const cookie = request.headers.get('cookie')
 
-  if (!refreshUrl || !cookie) return createSigninRedirectResponse(redirectTarget)
+  if (!refreshUrl || !cookie) return createHomeRedirectResponse()
 
   try {
     const response = await fetch(refreshUrl, {
@@ -104,10 +102,10 @@ export async function GET(request: Request) {
       cache: 'no-store',
     })
 
-    if (!response.ok) return createSigninRedirectResponse(redirectTarget)
+    if (!response.ok) return createHomeRedirectResponse()
 
     return createRedirectResponse(redirectTarget.href, getSetCookieHeaders(response.headers))
   } catch {
-    return createSigninRedirectResponse(redirectTarget)
+    return createHomeRedirectResponse()
   }
 }

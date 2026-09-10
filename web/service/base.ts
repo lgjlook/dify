@@ -41,7 +41,6 @@ import {
 } from '@/config'
 import { asyncRunSafe } from '@/utils'
 import { isClient } from '@/utils/client'
-import { resolveLoginRedirectTarget } from '@/utils/login-redirect'
 import { basePath } from '@/utils/var'
 import { base, ContentType, getBaseOptions } from './fetch'
 import { refreshAccessTokenOrReLogin } from './refresh-token'
@@ -280,31 +279,6 @@ function jumpTo(url: string) {
   const targetPath = new URL(url, window.location.origin).pathname
   if (targetPath === window.location.pathname) return
   window.location.href = url
-}
-
-const OAUTH_AUTHORIZE_PATH = '/account/oauth/authorize'
-const SIGNIN_PATH = '/signin'
-
-export const buildSigninUrlWithRedirect = (): string => {
-  const loginUrl = `${isClient ? window.location.origin : ''}${basePath}/signin`
-  if (!isClient) return loginUrl
-
-  const signinPath = `${basePath}${SIGNIN_PATH}`
-  if (window.location.pathname === signinPath || window.location.pathname === `${signinPath}/`)
-    return loginUrl
-
-  if (window.location.pathname.includes(OAUTH_AUTHORIZE_PATH)) {
-    const currentUrl = window.location.href
-    return `${loginUrl}?redirect_url=${encodeURIComponent(currentUrl)}`
-  }
-
-  const currentTarget = resolveLoginRedirectTarget(
-    `${window.location.pathname}${window.location.search}${window.location.hash}`,
-    { allowSameOriginAbsolute: false },
-  )
-  if (!currentTarget || currentTarget.kind !== 'internal') return loginUrl
-
-  return `${loginUrl}?redirect_url=${encodeURIComponent(currentTarget.href)}`
 }
 
 function unicodeToChar(text: string) {
@@ -1085,10 +1059,10 @@ export const request = async <T>(url: string, options = {}, otherOptions?: IOthe
 
       const [parseErr, errRespData] = await asyncRunSafe<ResponseError>(errResp.json())
       if (parseErr) {
-        if (errResp.status === 401) {
+        // Console sign-in has been removed: there is no login page to bounce to,
+        // so just surface the failure to the caller.
+        if (errResp.status === 401)
           discardRegistrationStateForConsoleAuthBoundary(otherOptionsForBaseFetch)
-          window.location.href = buildSigninUrlWithRedirect()
-        }
         return Promise.reject(err)
       }
       if (/\/login/.test(url)) return Promise.reject(errRespData)
@@ -1126,20 +1100,10 @@ export const request = async <T>(url: string, options = {}, otherOptions?: IOthe
       // refresh token
       const [refreshErr] = await asyncRunSafe(refreshAccessTokenOrReLogin(TIME_OUT))
       if (refreshErr === null) return baseFetch<T>(url, options, otherOptionsForBaseFetch)
-      // /device is the device-flow chooser; logged-out is a valid state
-      // there. Redirecting to /signin loses the user_code context and
-      // the post-login flow lands on /apps instead of returning here.
-      if (window.location.pathname === `${basePath}/device`) return Promise.reject(err)
       discardRegistrationStateForConsoleAuthBoundary(otherOptionsForBaseFetch)
-      if (window.location.pathname !== `${basePath}/signin`) {
-        jumpTo(buildSigninUrlWithRedirect())
-        return Promise.reject(err)
-      }
-      if (!silent) {
-        toast.error(message)
-        return Promise.reject(err)
-      }
-      jumpTo(buildSigninUrlWithRedirect())
+      // Console sign-in has been removed, so an expired/unauthorized session must
+      // not bounce the user to a login page. Surface the error instead.
+      if (!silent) toast.error(message)
       return Promise.reject(err)
     } else {
       return Promise.reject(err)

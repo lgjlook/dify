@@ -3,7 +3,7 @@ import logging
 import re
 from datetime import UTC, datetime, timedelta
 
-from flask import Request
+from flask import Request, g
 from werkzeug.exceptions import Unauthorized
 from werkzeug.wrappers import Response
 
@@ -195,6 +195,10 @@ def build_force_logout_cookie_headers() -> list[str]:
 
 
 def check_csrf_token(request: Request, user_id: str):
+    # Console sign-in is removed, so there is no session to protect: requests served
+    # through the automatic default account carry no CSRF cookie.
+    if getattr(g, "_login_bypassed", False):
+        return
     # some apis are sent by beacon, so we need to bypass csrf token check
     # since these APIs are post, they are already protected by SameSite: Lax, so csrf is not required.
     if is_admin_api_key_request(request):
