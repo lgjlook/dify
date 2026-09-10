@@ -1,10 +1,5 @@
 import type { TemplateCategory } from './categories'
 
-export const PAGE_LINK_CLASS =
-  'flex h-8 items-center justify-center rounded-lg border-[0.5px] border-divider-regular px-3 system-sm-medium text-text-secondary outline-hidden hover:bg-state-base-hover focus-visible:ring-2 focus-visible:ring-state-accent-solid'
-export const PAGE_LINK_DISABLED_CLASS =
-  'flex h-8 cursor-not-allowed items-center justify-center rounded-lg border-[0.5px] border-divider-subtle px-3 system-sm-medium text-text-quaternary'
-
 export type TemplatesHrefOptions = {
   category: TemplateCategory
   languages?: string[]

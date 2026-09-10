@@ -33,11 +33,6 @@ console_ns = Namespace("console", description="Console management API operations
 
 RESOURCE_MODULES = (
     "controllers.console.app.app_import",
-    "controllers.console.explore.audio",
-    "controllers.console.explore.completion",
-    "controllers.console.explore.conversation",
-    "controllers.console.explore.message",
-    "controllers.console.explore.workflow",
     "controllers.console.files",
     "controllers.console.remote_files",
 )
@@ -54,8 +49,6 @@ from . import (
     human_input_form,
     init_validate,
     knowledge_fs_proxy,
-    notification,
-    onboarding,
     setup,
     spec,
     system,
@@ -131,15 +124,7 @@ from .datasets.rag_pipeline import (
     rag_pipeline_workflow,
 )
 
-# Import explore controllers
-from .explore import (
-    banner,
-    installed_app,
-    parameter,
-    recommended_app,
-    saved_message,
-    trial,
-)
+# Import snippet controllers
 from .snippets import snippet_workflow, snippet_workflow_draft_variable
 from .socketio import workflow as socketio_workflow
 
@@ -183,7 +168,6 @@ __all__ = [
     "apikey",
     "app",
     "audio",
-    "banner",
     "billing",
     "bp",
     "completion",
@@ -209,7 +193,6 @@ __all__ = [
     "hit_testing",
     "human_input_form",
     "init_validate",
-    "installed_app",
     "knowledge_fs_proxy",
     "load_balancing_config",
     "login",
@@ -220,12 +203,9 @@ __all__ = [
     "model_config",
     "model_providers",
     "models",
-    "notification",
     "oauth",
     "oauth_server",
-    "onboarding",
     "ops_trace",
-    "parameter",
     "plugin",
     "rag_pipeline",
     "rag_pipeline_datasets",
@@ -233,8 +213,6 @@ __all__ = [
     "rag_pipeline_import",
     "rag_pipeline_workflow",
     "rbac",
-    "recommended_app",
-    "saved_message",
     "setup",
     "site",
     "skills",
@@ -247,7 +225,6 @@ __all__ = [
     "system",
     "tags",
     "tool_providers",
-    "trial",
     "trigger_providers",
     "website",
     "workflow",

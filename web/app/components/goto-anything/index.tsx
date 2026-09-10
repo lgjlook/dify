@@ -104,9 +104,7 @@ type MainNavRouteKey = (typeof MAIN_NAV_ROUTES)[number]['key']
 const scopeMainNavRouteKeys = {
   '@app': 'apps',
   '@knowledge': 'datasets',
-  '@plugin': 'marketplace',
-  '@skill': 'skills',
-  '@agents': 'roster',
+  '@plugin': 'plugins',
 } as const satisfies Partial<Record<ActionItem['key'], MainNavRouteKey>>
 
 function getScopeCardIcon(action: ActionItem) {

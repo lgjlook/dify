@@ -5,7 +5,6 @@ import type { TryAppSelection } from '@/types/try-app'
 import type { TrackCreateAppParams } from '@/utils/create-app-tracking'
 import { useAtomValue } from 'jotai'
 import { useCallback, useRef, useState } from 'react'
-import { EducationExpireNotice } from '@/app/education/expire-notice'
 import AppListContext from '@/context/app-list-context'
 import { workspacePermissionKeysAtom } from '@/context/permission-state'
 import { useImportDSL } from '@/hooks/use-import-dsl'
@@ -171,7 +170,6 @@ const AppsContent = () => {
 
   return (
     <>
-      <EducationExpireNotice />
       <AppListProvider
         value={{
           openTryAppPanel,

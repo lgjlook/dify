@@ -4749,21 +4749,6 @@
       "count": 1
     }
   },
-  "web/app/device/components/code-input.tsx": {
-    "jsx-a11y/no-autofocus": {
-      "count": 1
-    }
-  },
-  "web/app/device/page.tsx": {
-    "jsx-a11y/no-autofocus": {
-      "count": 1
-    }
-  },
-  "web/app/forgot-password/ForgotPasswordForm.spec.tsx": {
-    "typescript/no-explicit-any": {
-      "count": 5
-    }
-  },
   "web/app/init/InitPasswordPopup.tsx": {
     "typescript/no-explicit-any": {
       "count": 1
@@ -4774,23 +4759,8 @@
       "count": 7
     }
   },
-  "web/app/reset-password/layout.tsx": {
-    "typescript/no-explicit-any": {
-      "count": 1
-    }
-  },
-  "web/app/signin/layout.tsx": {
-    "typescript/no-explicit-any": {
-      "count": 1
-    }
-  },
   "web/app/signin/normal-form.tsx": {
     "@tanstack/query/prefer-query-options": {
-      "count": 1
-    }
-  },
-  "web/app/signup/layout.tsx": {
-    "typescript/no-explicit-any": {
       "count": 1
     }
   },
@@ -5133,7 +5103,7 @@
   },
   "web/service/use-common.ts": {
     "@tanstack/query/prefer-query-options": {
-      "count": 10
+      "count": 9
     }
   },
   "web/service/use-datasource.ts": {

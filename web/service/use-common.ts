@@ -65,44 +65,6 @@ export const useGenerateStructuredOutputRules = () => {
   })
 }
 
-export type MailSendResponse = { data: string; result: string }
-export const useSendMail = () => {
-  return useMutation({
-    mutationKey: [NAME_SPACE, 'mail-send'],
-    mutationFn: (body: { email: string; language: string }) => {
-      return post<MailSendResponse>('/email-register/send-email', { body })
-    },
-  })
-}
-
-export type MailValidityResponse = { is_valid: boolean; token: string }
-
-export const useMailValidity = () => {
-  return useMutation({
-    mutationKey: [NAME_SPACE, 'mail-validity'],
-    mutationFn: (body: { email: string; code: string; token: string }) => {
-      return post<MailValidityResponse>('/email-register/validity', { body })
-    },
-  })
-}
-
-export type MailRegisterResponse = { result: string; data: Record<string, never> }
-
-export const useMailRegister = () => {
-  return useMutation({
-    mutationKey: [NAME_SPACE, 'mail-register'],
-    mutationFn: (body: {
-      token: string
-      new_password: string
-      password_confirm: string
-      language?: string
-      timezone?: string
-    }) => {
-      return post<MailRegisterResponse>('/email-register', { body })
-    },
-  })
-}
-
 export const useFileSupportTypes = () => {
   return useQuery<FileTypesRes>({
     queryKey: [NAME_SPACE, 'file-types'],
@@ -168,18 +130,6 @@ export const useLogout = () => {
       // refetches once on the way to /signin, which is cheap.
       queryClient.clear()
     },
-  })
-}
-
-type ForgotPasswordValidity = CommonResponse & { is_valid: boolean; email: string; token: string }
-export const useVerifyForgotPasswordToken = (token?: string | null) => {
-  return useQuery<ForgotPasswordValidity>({
-    queryKey: commonQueryKeys.forgotPasswordValidity(token),
-    queryFn: () => post<ForgotPasswordValidity>('/forgot-password/validity', { body: { token } }),
-    enabled: !!token,
-    staleTime: 0,
-    gcTime: 0,
-    retry: false,
   })
 }
 

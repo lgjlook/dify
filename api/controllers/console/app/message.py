@@ -22,7 +22,7 @@ from controllers.console.app.error import (
     ProviderQuotaExceededError,
 )
 from controllers.console.app.wraps import get_app_model
-from controllers.console.explore.error import AppSuggestedQuestionsAfterAnswerDisabledError
+from controllers.console.error import AppSuggestedQuestionsAfterAnswerDisabledError
 from controllers.console.wraps import (
     RBACPermission,
     account_initialization_required,

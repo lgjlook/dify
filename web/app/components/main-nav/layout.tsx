@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 import { useStore as useAppStore } from '@/app/components/app/store'
 import { isCurrentWorkspaceDatasetOperatorAtom } from '@/context/workspace-state'
-import { isAgentV2Enabled } from '@/features/agent-v2/feature-flag'
 import { usePathname } from '@/next/navigation'
 import { MainNav } from '.'
 import { shouldHideMainNavigation, shouldUseDetailSidebar } from './routes'
@@ -42,7 +41,6 @@ const MainNavLayout = ({ children, detailSidebar }: MainNavLayoutProps) => {
   const isCurrentWorkspaceDatasetOperator = useAtomValue(isCurrentWorkspaceDatasetOperatorAtom)
   const hideMainNavigation = shouldHideMainNavigation(pathname)
   const useDetailSidebar = shouldUseDetailSidebar(pathname, {
-    agentV2Enabled: isAgentV2Enabled(),
     isCurrentWorkspaceDatasetOperator,
   })
 

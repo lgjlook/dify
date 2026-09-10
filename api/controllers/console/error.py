@@ -70,6 +70,12 @@ class AccountBannedError(BaseHTTPException):
     code = 400
 
 
+class AppSuggestedQuestionsAfterAnswerDisabledError(BaseHTTPException):
+    error_code = "app_suggested_questions_after_answer_disabled"
+    description = "Function Suggested questions after answer disabled."
+    code = 403
+
+
 class AccountNotFound(BaseHTTPException):
     error_code = "account_not_found"
     description = "Account not found."

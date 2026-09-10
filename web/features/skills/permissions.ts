@@ -9,12 +9,6 @@ const SkillPermission = {
   Delete: 'skill.delete',
 } as const
 
-export function useCanViewSkills() {
-  const permissionKeys = useAtomValue(workspacePermissionKeysAtom)
-
-  return hasPermission(permissionKeys, SkillPermission.View)
-}
-
 export function useSkillPermissions() {
   const permissionKeys = useAtomValue(workspacePermissionKeysAtom)
 

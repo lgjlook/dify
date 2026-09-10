@@ -40,14 +40,6 @@ type CreateAppProps = {
 
 const CREATE_APP_HOTKEY = 'Mod+Enter' satisfies Hotkey
 
-const shouldExpandBeginnerAppTypes = (appMode?: AppModeEnum) => {
-  return (
-    appMode === AppModeEnum.CHAT ||
-    appMode === AppModeEnum.AGENT_CHAT ||
-    appMode === AppModeEnum.COMPLETION
-  )
-}
-
 function CreateApp({ onClose, onCreateFromTemplate, defaultAppMode }: CreateAppProps) {
   const { t } = useTranslation()
   const { push } = useRouter()
@@ -62,9 +54,6 @@ function CreateApp({ onClose, onCreateFromTemplate, defaultAppMode }: CreateAppP
   const [showAppIconPicker, setShowAppIconPicker] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [isAppTypeExpanded, setIsAppTypeExpanded] = useState(() =>
-    shouldExpandBeginnerAppTypes(defaultAppMode),
-  )
 
   const { data: systemFeatures } = useSuspenseQuery(systemFeaturesQueryOptions())
   const deploymentEdition = systemFeatures.deployment_edition
@@ -228,75 +217,6 @@ function CreateApp({ onClose, onCreateFromTemplate, defaultAppMode }: CreateAppP
                   />
                 </div>
               </div>
-              <div>
-                <div className="mb-2 flex items-center">
-                  <button
-                    type="button"
-                    className="flex cursor-pointer items-center border-0 bg-transparent p-0 text-left focus-visible:ring-1 focus-visible:ring-components-input-border-active focus-visible:outline-hidden"
-                    onClick={() => setIsAppTypeExpanded(!isAppTypeExpanded)}
-                  >
-                    <span className="system-2xs-medium-uppercase text-text-tertiary">
-                      {t(($) => $['newApp.forBeginners'], { ns: 'app' })}
-                    </span>
-                    <span
-                      aria-hidden
-                      className={`ml-1 i-ri-arrow-right-s-line size-4 text-text-tertiary transition-transform ${isAppTypeExpanded ? 'rotate-90' : ''}`}
-                    />
-                  </button>
-                </div>
-                {isAppTypeExpanded && (
-                  <div className="flex flex-row gap-2">
-                    <AppTypeCard
-                      active={appMode === AppModeEnum.CHAT}
-                      title={t(($) => $['types.chatbot'], { ns: 'app' })}
-                      description={t(($) => $['newApp.chatbotShortDescription'], { ns: 'app' })}
-                      icon={
-                        <div className="flex size-6 items-center justify-center rounded-md bg-components-icon-bg-blue-solid">
-                          <span
-                            aria-hidden
-                            className="i-custom-vender-solid-communication-chat-bot size-4 text-components-avatar-shape-fill-stop-100"
-                          />
-                        </div>
-                      }
-                      onClick={() => {
-                        setAppMode(AppModeEnum.CHAT)
-                      }}
-                    />
-                    <AppTypeCard
-                      active={appMode === AppModeEnum.AGENT_CHAT}
-                      title={t(($) => $['types.agent'], { ns: 'app' })}
-                      description={t(($) => $['newApp.agentShortDescription'], { ns: 'app' })}
-                      icon={
-                        <div className="flex size-6 items-center justify-center rounded-md bg-components-icon-bg-violet-solid">
-                          <span
-                            aria-hidden
-                            className="i-custom-vender-solid-communication-logic size-4 text-components-avatar-shape-fill-stop-100"
-                          />
-                        </div>
-                      }
-                      onClick={() => {
-                        setAppMode(AppModeEnum.AGENT_CHAT)
-                      }}
-                    />
-                    <AppTypeCard
-                      active={appMode === AppModeEnum.COMPLETION}
-                      title={t(($) => $['newApp.completeApp'], { ns: 'app' })}
-                      description={t(($) => $['newApp.completionShortDescription'], { ns: 'app' })}
-                      icon={
-                        <div className="flex size-6 items-center justify-center rounded-md bg-components-icon-bg-teal-solid">
-                          <span
-                            aria-hidden
-                            className="i-custom-vender-solid-communication-list-sparkle size-4 text-components-avatar-shape-fill-stop-100"
-                          />
-                        </div>
-                      }
-                      onClick={() => {
-                        setAppMode(AppModeEnum.COMPLETION)
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
               <Divider style={{ margin: 0 }} />
               <div className="flex items-center space-x-3">
                 <div className="flex-1">
@@ -402,18 +322,9 @@ function CreateApp({ onClose, onCreateFromTemplate, defaultAppMode }: CreateAppP
                   'repeating-linear-gradient(135deg, transparent, transparent 2px, rgba(16,24,40,0.04) 4px,transparent 3px, transparent 6px)',
               }}
             >
-              <AppScreenShot show={appMode === AppModeEnum.CHAT} mode={AppModeEnum.CHAT} />
               <AppScreenShot
                 show={appMode === AppModeEnum.ADVANCED_CHAT}
                 mode={AppModeEnum.ADVANCED_CHAT}
-              />
-              <AppScreenShot
-                show={appMode === AppModeEnum.AGENT_CHAT}
-                mode={AppModeEnum.AGENT_CHAT}
-              />
-              <AppScreenShot
-                show={appMode === AppModeEnum.COMPLETION}
-                mode={AppModeEnum.COMPLETION}
               />
               <AppScreenShot show={appMode === AppModeEnum.WORKFLOW} mode={AppModeEnum.WORKFLOW} />
             </div>
@@ -485,25 +396,10 @@ function AppPreview({ mode }: { mode: AppModeEnum }) {
   const { t } = useTranslation()
   const previewInfo = (() => {
     switch (mode) {
-      case AppModeEnum.CHAT:
-        return {
-          title: t(($) => $['types.chatbot'], { ns: 'app' }),
-          description: t(($) => $['newApp.chatbotUserDescription'], { ns: 'app' }),
-        }
       case AppModeEnum.ADVANCED_CHAT:
         return {
           title: t(($) => $['types.advanced'], { ns: 'app' }),
           description: t(($) => $['newApp.advancedUserDescription'], { ns: 'app' }),
-        }
-      case AppModeEnum.AGENT_CHAT:
-        return {
-          title: t(($) => $['types.agent'], { ns: 'app' }),
-          description: t(($) => $['newApp.agentUserDescription'], { ns: 'app' }),
-        }
-      case AppModeEnum.COMPLETION:
-        return {
-          title: t(($) => $['newApp.completeApp'], { ns: 'app' }),
-          description: t(($) => $['newApp.completionUserDescription'], { ns: 'app' }),
         }
       case AppModeEnum.WORKFLOW:
         return {
@@ -530,10 +426,7 @@ function AppPreview({ mode }: { mode: AppModeEnum }) {
 function AppScreenShot({ mode, show }: { mode: AppModeEnum; show: boolean }) {
   const { theme } = useTheme()
   const modeToImageMap = {
-    [AppModeEnum.CHAT]: 'Chatbot',
     [AppModeEnum.ADVANCED_CHAT]: 'Chatflow',
-    [AppModeEnum.AGENT_CHAT]: 'Agent',
-    [AppModeEnum.COMPLETION]: 'TextGenerator',
     [AppModeEnum.WORKFLOW]: 'Workflow',
   }
   return (
