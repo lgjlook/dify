@@ -10,7 +10,6 @@ import type {
   IncrementSnippetUseCountResponse,
   Snippet as SnippetContract,
   SnippetDSLImportResponse,
-  SnippetImportPayload,
   SnippetListResponse,
   SnippetWorkflow,
   UpdateSnippetPayload,
@@ -23,7 +22,10 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import dayjs from 'dayjs'
-import { consoleClient, consoleQuery } from '@/service/console'
+
+// NOTE: The `/snippets` and `/workspaces/current/customized-snippets` endpoints have been
+// removed from the simplified backend. These hooks are kept as build-safe stubs that return
+// empty data and issue NO network requests, so consuming components still compile and run.
 
 type SnippetListParams = {
   page?: number
@@ -53,12 +55,44 @@ type UpdateSnippetInput = SnippetIdInput & {
 const DEFAULT_SNIPPET_LIST_PARAMS = {
   page: 1,
   limit: 30,
-} satisfies Required<Pick<SnippetListParams, 'page' | 'limit'>>
-
+}
 const DEFAULT_GRAPH: SnippetCanvasData = {
   nodes: [],
   edges: [],
   viewport: { x: 0, y: 0, zoom: 1 },
+}
+
+const EMPTY_SNIPPET_LIST: SnippetListResponse = {
+  data: [],
+  page: 1,
+  limit: 30,
+  total: 0,
+  has_more: false,
+}
+
+const EMPTY_SNIPPET_CONTRACT: SnippetContract = {
+  id: '',
+  name: '',
+  description: null,
+  type: 'node',
+  is_published: false,
+  version: 0,
+  use_count: 0,
+  tags: [],
+  created_at: 0,
+  graph: {},
+  input_fields: [],
+  created_by: null,
+  updated_by: null,
+}
+
+const EMPTY_DSL_IMPORT: SnippetDSLImportResponse = {
+  id: '',
+  status: '',
+  snippet_id: null,
+  current_dsl_version: '',
+  imported_dsl_version: '',
+  error: '',
 }
 
 const toMilliseconds = (timestamp?: number) => {
@@ -147,30 +181,11 @@ const normalizeSnippetListParams = (params: SnippetListParams) => {
 
 const snippetListRootKey = ['snippets', 'list'] as const
 const snippetListKey = (params: SnippetListParams) => [...snippetListRootKey, params]
-const customizedSnippetsContract = consoleQuery.workspaces.current.customizedSnippets
-const customizedSnippetsClient = consoleClient.workspaces.current.customizedSnippets
 
 const invalidateSnippetQueries = (queryClient: ReturnType<typeof useQueryClient>) => {
   queryClient.invalidateQueries({
-    queryKey: customizedSnippetsContract.key(),
-  })
-  queryClient.invalidateQueries({
-    queryKey: consoleQuery.snippets.key(),
-  })
-  queryClient.invalidateQueries({
     queryKey: snippetListRootKey,
   })
-}
-
-const toGeneratedSnippetListQuery = (params: SnippetListParams) => {
-  return {
-    page: params.page,
-    limit: params.limit,
-    ...(params.keyword ? { keyword: params.keyword } : {}),
-    ...(params.tag_ids?.length ? { tag_ids: params.tag_ids } : {}),
-    ...(params.creator_ids?.length ? { creators: params.creator_ids } : {}),
-    ...(typeof params.is_published === 'boolean' ? { is_published: params.is_published } : {}),
-  }
 }
 
 export const useInfiniteSnippetList = (
@@ -181,15 +196,8 @@ export const useInfiniteSnippetList = (
 
   return useInfiniteQuery<SnippetListResponse>({
     queryKey: snippetListKey(normalizedParams),
-    queryFn: ({ pageParam = normalizedParams.page }) => {
-      return customizedSnippetsClient.get({
-        query: {
-          ...toGeneratedSnippetListQuery(normalizedParams),
-          page: pageParam as number,
-        },
-      })
-    },
-    getNextPageParam: (lastPage) => (lastPage.has_more ? lastPage.page + 1 : undefined),
+    queryFn: async () => EMPTY_SNIPPET_LIST,
+    getNextPageParam: () => undefined,
     initialPageParam: normalizedParams.page,
     placeholderData: keepPreviousData,
     ...options,
@@ -197,12 +205,9 @@ export const useInfiniteSnippetList = (
 }
 
 export const useSnippetApiDetail = (snippetId: string) => {
-  return useQuery({
-    ...customizedSnippetsContract.bySnippetId.get.queryOptions({
-      input: {
-        params: { snippet_id: snippetId },
-      },
-    }),
+  return useQuery<SnippetContract>({
+    queryKey: ['snippets', 'detail', snippetId],
+    queryFn: async () => EMPTY_SNIPPET_CONTRACT,
     enabled: !!snippetId,
   })
 }
@@ -211,8 +216,8 @@ export const useCreateSnippetMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation<SnippetContract, Error, CreateSnippetInput>({
-    mutationKey: customizedSnippetsContract.post.mutationKey(),
-    mutationFn: (input) => customizedSnippetsClient.post(input),
+    mutationKey: ['snippets', 'create'],
+    mutationFn: async () => EMPTY_SNIPPET_CONTRACT,
     onSuccess: () => {
       invalidateSnippetQueries(queryClient)
     },
@@ -223,14 +228,8 @@ export const useUpdateSnippetMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation<SnippetContract, Error, UpdateSnippetInput>({
-    mutationKey: customizedSnippetsContract.bySnippetId.patch.mutationKey(),
-    mutationFn: ({ params, body }) =>
-      customizedSnippetsClient.bySnippetId.patch({
-        params: {
-          snippet_id: params.snippetId,
-        },
-        body,
-      }),
+    mutationKey: ['snippets', 'update'],
+    mutationFn: async () => EMPTY_SNIPPET_CONTRACT,
     onSuccess: () => {
       invalidateSnippetQueries(queryClient)
     },
@@ -241,13 +240,8 @@ export const useDeleteSnippetMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation<unknown, Error, SnippetIdInput>({
-    mutationKey: customizedSnippetsContract.bySnippetId.delete.mutationKey(),
-    mutationFn: ({ params }) =>
-      customizedSnippetsClient.bySnippetId.delete({
-        params: {
-          snippet_id: params.snippetId,
-        },
-      }),
+    mutationKey: ['snippets', 'delete'],
+    mutationFn: async () => undefined,
     onSuccess: () => {
       invalidateSnippetQueries(queryClient)
     },
@@ -258,13 +252,8 @@ export const useIncrementSnippetUseCountMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation<IncrementSnippetUseCountResponse, Error, SnippetIdInput>({
-    mutationKey: customizedSnippetsContract.bySnippetId.useCount.increment.post.mutationKey(),
-    mutationFn: ({ params }) =>
-      customizedSnippetsClient.bySnippetId.useCount.increment.post({
-        params: {
-          snippet_id: params.snippetId,
-        },
-      }),
+    mutationKey: ['snippets', 'use-count', 'increment'],
+    mutationFn: async () => ({ result: '', use_count: 0 }),
     onSuccess: () => {
       invalidateSnippetQueries(queryClient)
     },
@@ -273,15 +262,7 @@ export const useIncrementSnippetUseCountMutation = () => {
 
 export const useExportSnippetMutation = () => {
   return useMutation<string, Error, { snippetId: string; include?: boolean; workflowId?: string }>({
-    mutationFn: ({ snippetId, include = false, workflowId }) => {
-      return customizedSnippetsClient.bySnippetId.export.get({
-        params: { snippet_id: snippetId },
-        query: {
-          include_secret: include ? 'true' : 'false',
-          workflow_id: workflowId,
-        },
-      })
-    },
+    mutationFn: async () => '',
   })
 }
 
@@ -293,17 +274,8 @@ export const useImportSnippetDSLMutation = () => {
     Error,
     { mode: 'yaml-content' | 'yaml-url'; yamlContent?: string; yamlUrl?: string }
   >({
-    mutationFn: ({ mode, yamlContent, yamlUrl }) => {
-      const body: SnippetImportPayload = {
-        mode,
-        yaml_content: yamlContent,
-        yaml_url: yamlUrl,
-      }
-
-      return customizedSnippetsClient.imports.post({
-        body,
-      })
-    },
+    mutationKey: ['snippets', 'import', 'dsl'],
+    mutationFn: async () => EMPTY_DSL_IMPORT,
     onSuccess: () => {
       invalidateSnippetQueries(queryClient)
     },
@@ -314,13 +286,8 @@ export const useConfirmSnippetImportMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation<SnippetDSLImportResponse, Error, { importId: string }>({
-    mutationFn: ({ importId }) => {
-      return customizedSnippetsClient.imports.byImportId.confirm.post({
-        params: {
-          import_id: importId,
-        },
-      })
-    },
+    mutationKey: ['snippets', 'import', 'confirm'],
+    mutationFn: async () => EMPTY_DSL_IMPORT,
     onSuccess: () => {
       invalidateSnippetQueries(queryClient)
     },

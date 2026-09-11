@@ -132,9 +132,11 @@ export const fetchAppDetail = async (id: string): Promise<ExploreAppDetailRespon
 }
 
 export const fetchInstalledAppList = (appId?: string | null) => {
-  if (!appId) return consoleClient.installedApps.get({})
-
-  return consoleClient.installedApps.get({
-    query: { app_id: appId },
+  // The `/console/api/installed-apps` endpoint has been removed from the simplified backend.
+  // Return an empty list instead of issuing a network request.
+  return Promise.resolve({
+    installed_apps: [],
+    has_more: false,
+    next_cursor: null,
   })
 }
