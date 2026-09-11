@@ -1,6 +1,9 @@
-import { consoleQuery } from '@/service/console'
+import { queryOptions } from '@tanstack/react-query'
+import { SYSTEM_FEATURES_MOCK } from './mock'
 
 export const systemFeaturesQueryOptions = () =>
-  consoleQuery.systemFeatures.get.queryOptions({
+  queryOptions({
+    queryKey: ['system-features'],
+    queryFn: () => SYSTEM_FEATURES_MOCK,
     staleTime: Infinity,
   })

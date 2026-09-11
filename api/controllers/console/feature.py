@@ -105,27 +105,6 @@ class AppDslVersionApi(Resource):
         )
 
 
-@console_ns.route("/system-features")
-class SystemFeatureApi(Resource):
-    @console_ns.doc("get_system_features")
-    @console_ns.doc(
-        description="Get the non-sensitive bootstrap snapshot exposed before Console or Web authentication. "
-        "This is not a general feature registry."
-    )
-    @console_ns.response(
-        200,
-        "Success",
-        console_ns.models[SystemFeatureModel.__name__],
-    )
-    def get(self):
-        """Get the non-sensitive bootstrap snapshot exposed before authentication.
-
-        Authentication configuration must be available before the authentication flow can be selected.
-        Authenticated license detail is served separately by SystemFeatureLicenseApi.
-        """
-        return dump_response(SystemFeatureModel, application_services().feature_queries.get_public_system_features())
-
-
 @console_ns.route("/system-features/license")
 class SystemFeatureLicenseApi(Resource):
     @console_ns.doc("get_system_license")

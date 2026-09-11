@@ -1,14 +1,18 @@
-import { dehydrate } from '@tanstack/react-query'
+import { dehydrate, queryOptions } from '@tanstack/react-query'
 import { cache } from 'react'
 import { getQueryClient } from '@/app/get-query-client'
 import { connection } from '@/next/server'
-import { consoleQuery } from '@/service/console'
+import { SYSTEM_FEATURES_MOCK } from './mock'
 import 'server-only'
 
 const getRequestQueryClient = cache(getQueryClient)
 
 const systemFeaturesServerQueryOptions = () =>
-  consoleQuery.systemFeatures.get.queryOptions({ staleTime: 'static' })
+  queryOptions({
+    queryKey: ['system-features'],
+    queryFn: () => SYSTEM_FEATURES_MOCK,
+    staleTime: 'static',
+  })
 
 export const getOptionalSystemFeatures = async () => {
   await connection()
