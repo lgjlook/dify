@@ -39,34 +39,6 @@ export const MAIN_NAV_ROUTES = [
     activeIcon: 'i-custom-vender-main-nav-studio-v2-active',
     visibility: VISIBLE_TO_ALL,
   },
-  {
-    key: 'datasets',
-    href: '/datasets',
-    labelKey: 'menus.datasets',
-    active: (path: string) => isPathUnderRoute(path, '/datasets'),
-    icon: 'i-custom-vender-main-nav-knowledge-v2',
-    activeIcon: 'i-custom-vender-main-nav-knowledge-v2-active',
-    visibility: VISIBLE_TO_ALL,
-  },
-  {
-    key: 'integrations',
-    href: buildIntegrationPath('provider'),
-    labelKey: 'mainNav.integrations',
-    active: (path: string) =>
-      isPathUnderRoute(path, '/integrations') || isPathUnderRoute(path, '/tools'),
-    icon: 'i-custom-vender-main-nav-integrations-v2',
-    activeIcon: 'i-custom-vender-main-nav-integrations-v2-active',
-    visibility: VISIBLE_TO_ALL,
-  },
-  {
-    key: 'plugins',
-    href: '/plugins',
-    label: 'Plugins',
-    active: (path: string) => isPathUnderRoute(path, '/plugins'),
-    icon: 'i-custom-vender-main-nav-marketplace-v2',
-    activeIcon: 'i-custom-vender-main-nav-marketplace-v2-active',
-    visibility: VISIBLE_TO_ALL,
-  },
 ] as const satisfies readonly MainNavRouteConfig[]
 
 export function isMainNavRouteVisible(

@@ -394,25 +394,10 @@ function AppTypeCard({ icon, title, description, active, onClick }: AppTypeCardP
 
 function AppPreview({ mode }: { mode: AppModeEnum }) {
   const { t } = useTranslation()
-  const previewInfo = (() => {
-    switch (mode) {
-      case AppModeEnum.ADVANCED_CHAT:
-        return {
-          title: t(($) => $['types.advanced'], { ns: 'app' }),
-          description: t(($) => $['newApp.advancedUserDescription'], { ns: 'app' }),
-        }
-      case AppModeEnum.WORKFLOW:
-        return {
-          title: t(($) => $['types.workflow'], { ns: 'app' }),
-          description: t(($) => $['newApp.workflowUserDescription'], { ns: 'app' }),
-        }
-      default:
-        return {
-          title: t(($) => $['types.workflow'], { ns: 'app' }),
-          description: t(($) => $['newApp.workflowUserDescription'], { ns: 'app' }),
-        }
-    }
-  })()
+  const previewInfo = {
+    title: t(($) => $['types.workflow'], { ns: 'app' }),
+    description: t(($) => $['newApp.workflowUserDescription'], { ns: 'app' }),
+  }
   return (
     <div className="px-8 py-4">
       <h4 className="system-sm-semibold-uppercase text-text-secondary">{previewInfo.title}</h4>
@@ -426,7 +411,6 @@ function AppPreview({ mode }: { mode: AppModeEnum }) {
 function AppScreenShot({ mode, show }: { mode: AppModeEnum; show: boolean }) {
   const { theme } = useTheme()
   const modeToImageMap = {
-    [AppModeEnum.ADVANCED_CHAT]: 'Chatflow',
     [AppModeEnum.WORKFLOW]: 'Workflow',
   }
   return (

@@ -45,7 +45,7 @@ export function MainNav({ className }: MainNavProps) {
         }),
       ).map((route) => ({
         href: route.href,
-        label: 'label' in route ? route.label : t(($) => $[route.labelKey], { ns: 'common' }),
+        label: ('label' in route ? route.label : t(($) => $[route.labelKey], { ns: 'common' })) as string,
         active: route.active,
         icon: route.icon,
         activeIcon: route.activeIcon,
