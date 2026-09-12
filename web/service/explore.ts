@@ -5,6 +5,7 @@ import type {
   RecommendedAppInfoResponse,
   RecommendedAppResponse,
 } from '@dify/contracts/api/console/explore/types.gen'
+import type { InstalledAppListResponse } from '@dify/contracts/api/console/installed-apps/types.gen'
 import type { App, AppCategory } from '@/models/explore'
 import type { AppIconType } from '@/types/app'
 import { consoleClient } from '@/service/console'
@@ -131,7 +132,9 @@ export const fetchAppDetail = async (id: string): Promise<ExploreAppDetailRespon
   return normalizeAppDetail(response)
 }
 
-export const fetchInstalledAppList = (appId?: string | null) => {
+export const fetchInstalledAppList = (
+  appId?: string | null,
+): Promise<InstalledAppListResponse> => {
   // The `/console/api/installed-apps` endpoint has been removed from the simplified backend.
   // Return an empty list instead of issuing a network request.
   return Promise.resolve({

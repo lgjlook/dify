@@ -5,6 +5,7 @@
  */
 
 import { spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { cp, mkdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -83,6 +84,13 @@ const copyAllDirs = async (standaloneRoot) => {
 
 // Run copy operations and start server
 const main = async () => {
+  // Load .env.local so PORT/HOSTNAME (and other local overrides) take effect
+  // when running `pnpm start`, matching what `next dev`/`next build` load.
+  const envLocalPath = path.join(process.cwd(), '.env.local')
+  if (existsSync(envLocalPath)) {
+    process.loadEnvFile(envLocalPath)
+  }
+
   console.debug('Starting copy-and-start script')
   const standaloneRoot = await getStandaloneRoot()
   const serverScriptPath = path.join(standaloneRoot, 'server.js')

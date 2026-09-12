@@ -38,8 +38,8 @@ import AppNavItem from '@/app/components/explore/installed-app-navigation/app-na
 import { InstalledAppPaginationSkeleton } from '@/app/components/explore/installed-app-navigation/pagination-skeleton'
 import { isInstalledAppPath } from '@/app/components/explore/installed-app/routes'
 import { workspacePermissionKeysAtom } from '@/context/permission-state'
+import { INSTALLED_APP_LIST_MOCK } from '@/features/installed-apps/mock'
 import { usePathname } from '@/next/navigation'
-import { consoleQuery } from '@/service/console'
 import { hasPermission } from '@/utils/permission'
 
 const emptyInstalledApps: InstalledAppResponse[] = []
@@ -75,29 +75,25 @@ const WebAppsSectionContent = () => {
   const [uninstallDialogAppId, setUninstallDialogAppId] = useState<string | null>(null)
   const normalizedSearchText = searchText.trim()
 
-  const installedAppsQuery = useInfiniteQuery(
-    consoleQuery.installedApps.get.infiniteOptions({
-      input: (pageParam: string | undefined) => ({
-        query: {
-          limit: 20,
-          ...(typeof pageParam === 'string' ? { cursor: pageParam } : {}),
-          ...(normalizedSearchText ? { name: normalizedSearchText } : {}),
-        },
-      }),
-      getNextPageParam: (lastPage) =>
-        lastPage.has_more && lastPage.next_cursor ? lastPage.next_cursor : undefined,
-      initialPageParam: undefined,
-      placeholderData: keepPreviousData,
-      select: selectInstalledApps,
-    }),
-  )
+  // The `/console/api/installed-apps` endpoints have been removed from the
+  // simplified backend. Resolve to an empty list locally instead of issuing
+  // network requests; the uninstall/pin mutations are no-ops because the list
+  // is always empty.
+  const installedAppsQuery = useInfiniteQuery({
+    queryKey: ['installed-apps'],
+    queryFn: () => INSTALLED_APP_LIST_MOCK,
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: () => undefined as string | undefined,
+    placeholderData: keepPreviousData,
+    select: selectInstalledApps,
+  })
   const installedApps = installedAppsQuery.data ?? emptyInstalledApps
-  const uninstallAppMutation = useMutation(
-    consoleQuery.installedApps.byInstalledAppId.delete.mutationOptions(),
-  )
-  const updatePinStatusMutation = useMutation(
-    consoleQuery.installedApps.byInstalledAppId.patch.mutationOptions(),
-  )
+  const uninstallAppMutation = useMutation({
+    mutationFn: async (_input: unknown) => ({ result: 'success' }),
+  })
+  const updatePinStatusMutation = useMutation({
+    mutationFn: async (_input: unknown) => ({ result: 'success' }),
+  })
 
   const webAppRows = useMemo<WebAppListRow[]>(() => {
     const pinnedAppsCount = installedApps.filter(({ is_pinned }) => is_pinned).length
